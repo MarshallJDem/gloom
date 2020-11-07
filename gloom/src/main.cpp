@@ -1,3 +1,5 @@
+/*Test*/
+
 // Local headers
 #include "gloom/gloom.hpp"
 #include "program.hpp"

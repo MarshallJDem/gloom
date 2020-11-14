@@ -22,6 +22,8 @@ static std::string ParseShader(const std::string& filepath)
 	std::stringstream ss;
 	ss << stream.rdbuf();
 
+	//std::cout << "test" << ss.str() << std::endl;
+
 	return ss.str();
 }
 
@@ -115,8 +117,8 @@ void runProgram(GLFWwindow* window)
 
 	//shader
 	ShaderProgramSource source;
-	source.VertexSource = ParseShader("shaders/simple.vert");
-	source.FragmentSource = ParseShader("shaders/simple.frag");
+	source.VertexSource = ParseShader("../gloom/shaders/simple.vert");
+	source.FragmentSource = ParseShader("../gloom/shaders/simple.frag");
 	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
 	glUseProgram(shader);
 

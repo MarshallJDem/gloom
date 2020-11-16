@@ -1,72 +1,11 @@
 // Local headers
 #include "program.hpp"
 #include "gloom/gloom.hpp"
+#include "gloom/shader.hpp"
 
-#include <iostream>
-#include <fstream>
 #include <string>
-#include <sstream>
 
 #define ASSERT(x) if (!(x)) __debugbreak();
-//parse shaders
-struct ShaderProgramSource
-{
-	std::string VertexSource;
-	std::string FragmentSource;
-};
-
-static std::string ParseShader(const std::string& filepath)
-{
-	std::ifstream stream(filepath);
-
-	std::stringstream ss;
-	ss << stream.rdbuf();
-
-	//std::cout << "test" << ss.str() << std::endl;
-
-	return ss.str();
-}
-
-static unsigned int CompileShader(unsigned int type, const std::string& source)
-{
-	unsigned int id = glCreateShader(type);
-	const char* src = source.c_str();
-	glShaderSource(id, 1, &src, nullptr);
-	glCompileShader(id);
-
-	//ERROR HANDLING
-	int result;
-	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-	if (result == GL_FALSE) {
-		int length;
-		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-		char* message = (char*)alloca(length * sizeof(char));
-		glGetShaderInfoLog(id, length, &length, message);
-		std::cout << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << std::endl;
-		std::cout << message << std::endl;
-		glDeleteShader(id);
-		return 0;
-	}
-
-	return id;
-}
-
-static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
-{
-	unsigned int program = glCreateProgram();
-	unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-	unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
-
-	glAttachShader(program, vs);
-	glAttachShader(program, fs);
-	glLinkProgram(program);
-	glValidateProgram(program);
-
-	glDeleteShader(vs);
-	glDeleteShader(fs);
-
-	return program;
-}
 
 
 void runProgram(GLFWwindow* window)
@@ -80,6 +19,10 @@ void runProgram(GLFWwindow* window)
 
     // Set default colour after clearing the colour buffer
     glClearColor(0.3f, 0.5f, 0.8f, 1.0f);
+
+	//shader
+	Gloom::Shader shader;
+	shader.makeBasicShader("../gloom/shaders/simple.vert", "../gloom/shaders/simple.frag");
 
     // Set up your scene here (create Vertex Array Objects, etc.)
 
@@ -115,15 +58,8 @@ void runProgram(GLFWwindow* window)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
-	//shader
-	ShaderProgramSource source;
-	source.VertexSource = ParseShader("../gloom/shaders/simple.vert");
-	source.FragmentSource = ParseShader("../gloom/shaders/simple.frag");
-	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-	glUseProgram(shader);
-
 	//color uniform
-	int location = glGetUniformLocation(shader, "u_Color");
+	int location = glGetUniformLocation(shader.get(), "u_Color");
 	ASSERT(location != -1);
 	glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f);
 
@@ -146,7 +82,7 @@ void runProgram(GLFWwindow* window)
         // Draw your scene here
 
 		//bind everything
-		glUseProgram(shader);
+		shader.activate();
 		glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
 
 		glBindVertexArray(vao);

@@ -3,7 +3,11 @@
 #include "gloom/gloom.hpp"
 #include "gloom/shader.hpp"
 #include "gloom/camera.hpp"
-#include "gloom/stb_image.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+//#include "gloom/stb_image.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
